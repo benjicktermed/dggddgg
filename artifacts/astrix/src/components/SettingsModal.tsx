@@ -145,6 +145,7 @@ export default function SettingsModal({ open, onClose }: Props) {
   const handleSelectGame = (game: GameResult) => {
     const g: SelectedGame = {
       universeId: game.universeId,
+      placeId: game.placeId,
       name: game.name,
       iconUrl: game.iconUrl,
       thumbnailUrl: game.thumbnailUrl,
@@ -322,41 +323,67 @@ export default function SettingsModal({ open, onClose }: Props) {
                     Loading game passes…
                   </div>
                 ) : gamepasses.length > 0 ? (
-                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-0.5">
-                    {gamepasses.map((gp) => (
-                      <div
-                        key={gp.id}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-background border border-border"
-                      >
-                        {gp.iconUrl ? (
-                          <img
-                            src={gp.iconUrl}
-                            alt={gp.name}
-                            className="w-8 h-8 rounded-lg object-cover shrink-0"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                            <Ticket className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold truncate">{gp.name}</p>
-                          {!gp.isForSale ? (
-                            <p className="text-[11px] text-muted-foreground">Not for sale</p>
-                          ) : gp.price !== null ? (
-                            <p className="text-[11px] text-yellow-400 font-semibold">R$ {gp.price.toLocaleString()}</p>
+                  <>
+                    <div className="max-h-48 overflow-y-auto space-y-1.5 pr-0.5">
+                      {gamepasses.map((gp) => (
+                        <div
+                          key={gp.id}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-background border border-border"
+                        >
+                          {gp.iconUrl ? (
+                            <img
+                              src={gp.iconUrl}
+                              alt={gp.name}
+                              className="w-8 h-8 rounded-lg object-cover shrink-0"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                            />
                           ) : (
-                            <p className="text-[11px] text-green-400 font-semibold">Free</p>
+                            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                              <Ticket className="w-4 h-4 text-muted-foreground" />
+                            </div>
                           )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold truncate">{gp.name}</p>
+                            {!gp.isForSale ? (
+                              <p className="text-[11px] text-muted-foreground">Not for sale</p>
+                            ) : gp.price !== null ? (
+                              <p className="text-[11px] text-yellow-400 font-semibold">R$ {gp.price.toLocaleString()}</p>
+                            ) : (
+                              <p className="text-[11px] text-green-400 font-semibold">Free</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                    {selectedGame.placeId && (
+                      <a
+                        href={`https://www.roblox.com/games/${selectedGame.placeId}/store#!/store`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 flex items-center gap-1.5 text-[11px] text-primary hover:underline"
+                      >
+                        <Ticket className="w-3 h-3" />
+                        View all passes on Roblox
+                      </a>
+                    )}
+                  </>
                 ) : (
-                  <p className="text-xs text-muted-foreground py-1">
-                    No game passes found for this game.
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Game passes can't be fetched server-side — Roblox restricts this API to browsers.
+                    </p>
+                    {selectedGame.placeId && (
+                      <a
+                        href={`https://www.roblox.com/games/${selectedGame.placeId}/store#!/store`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        <Ticket className="w-3.5 h-3.5" />
+                        View Game Passes on Roblox →
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             )}

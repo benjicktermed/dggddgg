@@ -17,6 +17,7 @@ export interface KeyInfo {
 
 export interface SelectedGame {
   universeId: number;
+  placeId: number;
   name: string;
   iconUrl: string | null;
   thumbnailUrl: string | null;
