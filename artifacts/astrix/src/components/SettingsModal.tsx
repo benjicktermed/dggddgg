@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Settings, Loader2, Clock, Infinity, Gamepad2, Check, RotateCcw, Link } from "lucide-react";
+import { X, Settings, Loader2, Clock, Infinity, Gamepad2, Check, RotateCcw, Link, Ticket } from "lucide-react";
 import { useApp, type SelectedGame } from "@/context/AppContext";
 import { useLocation } from "wouter";
 
@@ -30,6 +30,14 @@ interface GameResult {
   placeId: number;
 }
 
+interface GamePass {
+  id: number;
+  name: string;
+  price: number | null;
+  isForSale: boolean;
+  iconUrl: string | null;
+}
+
 export default function SettingsModal({ open, onClose }: Props) {
   const { username, balance, profile, keyInfo, selectedGame, setUsername, setBalance, setProfile, setSelectedGame, logout } = useApp();
   const [, navigate] = useLocation();
@@ -48,6 +56,11 @@ export default function SettingsModal({ open, onClose }: Props) {
   const [previewGame, setPreviewGame] = useState<GameResult | null>(null);
   const gameInputRef = useRef<HTMLInputElement>(null);
 
+  // Gamepass state
+  const [gamepasses, setGamepasses] = useState<GamePass[]>([]);
+  const [gamepassLoading, setGamepassLoading] = useState(false);
+  const [gamepassNoData, setGamepassNoData] = useState(false);
+
   useEffect(() => {
     if (open) {
       setLoginInput(username);
@@ -55,8 +68,25 @@ export default function SettingsModal({ open, onClose }: Props) {
       setGameInput("");
       setGameError(null);
       setPreviewGame(null);
+      setGamepasses([]);
+      setGamepassNoData(false);
     }
   }, [open, username, balance]);
+
+  // Load gamepasses for the currently selected game on open
+  useEffect(() => {
+    if (open && selectedGame && gamepasses.length === 0 && !gamepassNoData) {
+      setGamepassLoading(true);
+      fetch(`/api/roblox/games/gamepasses?universeId=${selectedGame.universeId}`)
+        .then((r) => r.json())
+        .then((data: { gamepasses?: GamePass[]; noData?: boolean }) => {
+          setGamepasses(data.gamepasses ?? []);
+          setGamepassNoData(data.noData ?? false);
+        })
+        .catch(() => setGamepassNoData(true))
+        .finally(() => setGamepassLoading(false));
+    }
+  }, [open, selectedGame]);
 
   if (!open) return null;
 
@@ -125,6 +155,19 @@ export default function SettingsModal({ open, onClose }: Props) {
     setGameError(null);
     setGameSaved(true);
     setTimeout(() => setGameSaved(false), 2000);
+
+    // Fetch gamepasses for the newly selected game
+    setGamepasses([]);
+    setGamepassNoData(false);
+    setGamepassLoading(true);
+    fetch(`/api/roblox/games/gamepasses?universeId=${game.universeId}`)
+      .then((r) => r.json())
+      .then((data: { gamepasses?: GamePass[]; noData?: boolean }) => {
+        setGamepasses(data.gamepasses ?? []);
+        setGamepassNoData(data.noData ?? false);
+      })
+      .catch(() => setGamepassNoData(true))
+      .finally(() => setGamepassLoading(false));
   };
 
   const handleResetGame = () => {
@@ -132,6 +175,8 @@ export default function SettingsModal({ open, onClose }: Props) {
     setGameInput("");
     setPreviewGame(null);
     setGameError(null);
+    setGamepasses([]);
+    setGamepassNoData(false);
   };
 
   const handleLogout = () => {
@@ -261,6 +306,58 @@ export default function SettingsModal({ open, onClose }: Props) {
               <div className="flex items-center gap-2 mb-3 p-2.5 bg-green-500/10 border border-green-500/20 rounded-xl text-xs text-green-400">
                 <Check className="w-3.5 h-3.5 shrink-0" />
                 Banner updated! Reload the home page to see it.
+              </div>
+            )}
+
+            {/* Gamepasses for selected game */}
+            {selectedGame && (
+              <div className="mb-3">
+                <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase mb-2 flex items-center gap-1.5">
+                  <Ticket className="w-3 h-3" />
+                  Game Passes
+                </p>
+                {gamepassLoading ? (
+                  <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Loading game passes…
+                  </div>
+                ) : gamepasses.length > 0 ? (
+                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-0.5">
+                    {gamepasses.map((gp) => (
+                      <div
+                        key={gp.id}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-background border border-border"
+                      >
+                        {gp.iconUrl ? (
+                          <img
+                            src={gp.iconUrl}
+                            alt={gp.name}
+                            className="w-8 h-8 rounded-lg object-cover shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                            <Ticket className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold truncate">{gp.name}</p>
+                          {!gp.isForSale ? (
+                            <p className="text-[11px] text-muted-foreground">Not for sale</p>
+                          ) : gp.price !== null ? (
+                            <p className="text-[11px] text-yellow-400 font-semibold">R$ {gp.price.toLocaleString()}</p>
+                          ) : (
+                            <p className="text-[11px] text-green-400 font-semibold">Free</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground py-1">
+                    No game passes found for this game.
+                  </p>
+                )}
               </div>
             )}
 
