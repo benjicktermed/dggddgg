@@ -20,6 +20,7 @@ import {
   ChevronUp,
   Send,
   Gamepad2,
+  Radio,
 } from "lucide-react";
 import robloxLogo from "@/roblox-logo-DKvbWd-7.png";
 import robuxIcon from "@/robux-icon-CFocC_-X.png";
@@ -91,11 +92,121 @@ const sideNavItems = [
 ];
 
 export default function Home() {
-  const { username, balance, isLoggedIn, selectedGame } = useApp();
+  const { username, balance, isLoggedIn, selectedGame, profile, streamerMode, setStreamerMode } = useApp();
   const animatedBalance = useAnimatedNumber(balance, 900);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
+
+  const fmtBalance = animatedBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+
+  if (streamerMode) {
+    return (
+      <div className="min-h-screen bg-background text-foreground font-sans flex flex-col items-center justify-center p-4">
+        {/* Streamer overlay card — centered */}
+        <div className="w-full max-w-[320px] rounded-3xl border border-border bg-card shadow-2xl overflow-hidden">
+          {/* Top glow bar */}
+          <div className="h-1 w-full bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+
+          <div className="px-6 pt-6 pb-5 flex flex-col items-center gap-4">
+            {/* Live badge */}
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
+              <Radio className="w-3 h-3 animate-pulse" />
+              STREAMER MODE
+            </div>
+
+            {/* Avatar */}
+            <div className="relative">
+              {profile?.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  className="w-24 h-24 rounded-full object-cover border-4 border-primary/30 shadow-lg"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-secondary border-4 border-primary/30 flex items-center justify-center shadow-lg">
+                  <span className="text-3xl font-bold text-muted-foreground">
+                    {(username || "?")[0].toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-card" />
+            </div>
+
+            {/* Name */}
+            <div className="text-center">
+              <p className="font-bold text-lg leading-tight">
+                {profile?.displayName ?? username ?? "Player"}
+              </p>
+              {profile?.name && profile.name !== profile.displayName && (
+                <p className="text-xs text-muted-foreground">@{profile.name}</p>
+              )}
+            </div>
+
+            {/* Robux balance display */}
+            <div className="w-full rounded-2xl bg-background border border-border px-5 py-4 flex flex-col items-center gap-1">
+              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                Robux Balance
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <img src={robuxIcon} alt="Robux" className="w-7 h-7" />
+                <span className="text-3xl font-extrabold tracking-tight">
+                  {isLoggedIn ? fmtBalance : "0"}
+                </span>
+              </div>
+            </div>
+
+            {/* Send Robux button */}
+            <button
+              onClick={() => setSendOpen(true)}
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm rounded-2xl py-3 transition-colors shadow-md"
+            >
+              <Send className="w-4 h-4" />
+              Send Robux
+            </button>
+
+            {/* Selected game badge */}
+            {selectedGame && (
+              <div className="w-full flex items-center gap-2.5 rounded-xl bg-background border border-border px-3 py-2">
+                {selectedGame.iconUrl ? (
+                  <img src={selectedGame.iconUrl} alt={selectedGame.name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                    <Gamepad2 className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate">{selectedGame.name}</p>
+                  <p className="text-[10px] text-muted-foreground">Active game</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer row */}
+          <div className="px-6 pb-5 flex items-center justify-between">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="w-4.5 h-4.5" />
+            </button>
+            <button
+              onClick={() => setStreamerMode(false)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <Radio className="w-3 h-3" />
+              Exit streamer mode
+            </button>
+          </div>
+        </div>
+
+        <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        <SendRobuxModal open={sendOpen} onClose={() => setSendOpen(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">

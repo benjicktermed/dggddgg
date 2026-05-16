@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Settings, Loader2, Clock, Infinity, Gamepad2, Check, RotateCcw, Link, Ticket } from "lucide-react";
+import { X, Settings, Loader2, Clock, Infinity, Gamepad2, Check, RotateCcw, Link, Ticket, Radio } from "lucide-react";
 import { useApp, type SelectedGame } from "@/context/AppContext";
 import { useLocation } from "wouter";
 
@@ -39,7 +39,7 @@ interface GamePass {
 }
 
 export default function SettingsModal({ open, onClose }: Props) {
-  const { username, balance, profile, keyInfo, selectedGame, setUsername, setBalance, setProfile, setSelectedGame, logout } = useApp();
+  const { username, balance, profile, keyInfo, selectedGame, streamerMode, setUsername, setBalance, setProfile, setSelectedGame, setStreamerMode, logout } = useApp();
   const [, navigate] = useLocation();
 
   const [loginInput, setLoginInput] = useState(username);
@@ -472,6 +472,38 @@ export default function SettingsModal({ open, onClose }: Props) {
                   </button>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Streamer Mode */}
+          <div>
+            <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase mb-3 flex items-center gap-1.5">
+              <Radio className="w-3.5 h-3.5" />
+              Streamer Mode
+            </p>
+            <div className="flex items-center justify-between p-3 bg-background rounded-xl border border-border">
+              <div>
+                <p className="text-sm font-semibold">Streamer View</p>
+                <p className="text-xs text-muted-foreground">Shows a clean centered card with your profile and balance</p>
+              </div>
+              <button
+                onClick={() => setStreamerMode(!streamerMode)}
+                className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                  streamerMode ? "bg-primary" : "bg-secondary"
+                }`}
+                aria-label="Toggle streamer mode"
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                    streamerMode ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+            {streamerMode && (
+              <p className="text-[11px] text-primary mt-1.5 px-0.5">
+                Streamer mode is ON — close Settings to see it
+              </p>
             )}
           </div>
 
