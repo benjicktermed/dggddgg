@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Settings, Loader2, Clock, Infinity, Gamepad2, Check, RotateCcw, Link, Ticket, Radio } from "lucide-react";
+import { X, Settings, Loader2, Clock, Infinity, Gamepad2, Check, RotateCcw, Link, Ticket, Crown } from "lucide-react";
 import { useApp, type SelectedGame } from "@/context/AppContext";
+import premiumIcon from "@assets/image-removebg-preview_1778900165065.png";
+import verifiedBadge from "@assets/image-removebg-preview_(1)_1778900210032.png";
 import { useLocation } from "wouter";
 
 interface Props {
@@ -39,7 +41,7 @@ interface GamePass {
 }
 
 export default function SettingsModal({ open, onClose }: Props) {
-  const { username, balance, profile, keyInfo, selectedGame, streamerMode, setUsername, setBalance, setProfile, setSelectedGame, setStreamerMode, logout } = useApp();
+  const { username, balance, profile, keyInfo, selectedGame, isPremium, setUsername, setBalance, setProfile, setSelectedGame, setIsPremium, logout } = useApp();
   const [, navigate] = useLocation();
 
   const [loginInput, setLoginInput] = useState(username);
@@ -208,15 +210,29 @@ export default function SettingsModal({ open, onClose }: Props) {
             </p>
             {profile && (
               <div className="flex items-center gap-3 mb-3 p-3 bg-background rounded-xl border border-border">
-                {profile.avatarUrl ? (
-                  <img src={profile.avatarUrl} alt={profile.name} className="w-10 h-10 rounded-full object-cover" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-                    {profile.name[0].toUpperCase()}
-                  </div>
-                )}
+                <div className="relative shrink-0">
+                  {profile.avatarUrl ? (
+                    <img src={profile.avatarUrl} alt={profile.name} className="w-10 h-10 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
+                      {profile.name[0].toUpperCase()}
+                    </div>
+                  )}
+                  {isPremium && (
+                    <img
+                      src={premiumIcon}
+                      alt="Premium"
+                      className="absolute -bottom-1 -right-1 w-4 h-4"
+                    />
+                  )}
+                </div>
                 <div>
-                  <p className="text-sm font-semibold">{profile.displayName}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-semibold">{profile.displayName}</p>
+                    {isPremium && (
+                      <img src={verifiedBadge} alt="Verified" className="w-4 h-4" />
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">@{profile.name}</p>
                 </div>
               </div>
@@ -475,36 +491,41 @@ export default function SettingsModal({ open, onClose }: Props) {
             )}
           </div>
 
-          {/* Streamer Mode */}
+          {/* Premium */}
           <div>
             <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase mb-3 flex items-center gap-1.5">
-              <Radio className="w-3.5 h-3.5" />
-              Streamer Mode
+              <Crown className="w-3.5 h-3.5" />
+              Premium
             </p>
             <div className="flex items-center justify-between p-3 bg-background rounded-xl border border-border">
-              <div>
-                <p className="text-sm font-semibold">Streamer View</p>
-                <p className="text-xs text-muted-foreground">Shows a clean centered card with your profile and balance</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <img src={premiumIcon} alt="Premium" className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-semibold">Premium Member</p>
+                    {isPremium && (
+                      <img src={verifiedBadge} alt="Verified" className="w-4 h-4" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Shows premium &amp; verified badge on your profile</p>
+                </div>
               </div>
               <button
-                onClick={() => setStreamerMode(!streamerMode)}
+                onClick={() => setIsPremium(!isPremium)}
                 className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
-                  streamerMode ? "bg-primary" : "bg-secondary"
+                  isPremium ? "bg-primary" : "bg-secondary"
                 }`}
-                aria-label="Toggle streamer mode"
+                aria-label="Toggle premium"
               >
                 <span
                   className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
-                    streamerMode ? "translate-x-5" : "translate-x-0"
+                    isPremium ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
               </button>
             </div>
-            {streamerMode && (
-              <p className="text-[11px] text-primary mt-1.5 px-0.5">
-                Streamer mode is ON — close Settings to see it
-              </p>
-            )}
           </div>
 
           {/* Active Key Info */}

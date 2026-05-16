@@ -31,13 +31,13 @@ interface AppState {
   profile: RobloxProfile | null;
   keyInfo: KeyInfo | null;
   selectedGame: SelectedGame | null;
-  streamerMode: boolean;
+  isPremium: boolean;
   setUsername: (u: string) => void;
   setBalance: (b: number) => void;
   setProfile: (p: RobloxProfile | null) => void;
   setKeyInfo: (k: KeyInfo | null) => void;
   setSelectedGame: (g: SelectedGame | null) => void;
-  setStreamerMode: (v: boolean) => void;
+  setIsPremium: (v: boolean) => void;
   logout: () => void;
 }
 
@@ -89,8 +89,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [profile, setProfileState] = useState<RobloxProfile | null>(loadProfile);
   const [keyInfo, setKeyInfoState] = useState<KeyInfo | null>(loadKeyInfo);
   const [selectedGame, setSelectedGameState] = useState<SelectedGame | null>(loadSelectedGame);
-  const [streamerMode, setStreamerModeState] = useState<boolean>(
-    () => localStorage.getItem("__streamer_mode__") === "1"
+  const [isPremium, setIsPremiumState] = useState<boolean>(
+    () => localStorage.getItem("__is_premium__") === "1"
   );
 
   const keyVerified = keyInfo !== null;
@@ -125,10 +125,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     else localStorage.removeItem("__selected_game__");
   };
 
-  const setStreamerMode = (v: boolean) => {
-    setStreamerModeState(v);
-    if (v) localStorage.setItem("__streamer_mode__", "1");
-    else localStorage.removeItem("__streamer_mode__");
+  const setIsPremium = (v: boolean) => {
+    setIsPremiumState(v);
+    if (v) localStorage.setItem("__is_premium__", "1");
+    else localStorage.removeItem("__is_premium__");
   };
 
   const logout = () => {
@@ -145,8 +145,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      username, balance, isLoggedIn, keyVerified, profile, keyInfo, selectedGame, streamerMode,
-      setUsername, setBalance, setProfile, setKeyInfo, setSelectedGame, setStreamerMode, logout,
+      username, balance, isLoggedIn, keyVerified, profile, keyInfo, selectedGame, isPremium,
+      setUsername, setBalance, setProfile, setKeyInfo, setSelectedGame, setIsPremium, logout,
     }}>
       {children}
     </AppContext.Provider>
