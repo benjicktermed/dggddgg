@@ -100,114 +100,6 @@ export default function Home() {
 
   const fmtBalance = animatedBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
 
-  if (streamerMode) {
-    return (
-      <div className="min-h-screen bg-background text-foreground font-sans flex flex-col items-center justify-center p-4">
-        {/* Streamer overlay card — centered */}
-        <div className="w-full max-w-[320px] rounded-3xl border border-border bg-card shadow-2xl overflow-hidden">
-          {/* Top glow bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-primary via-primary/60 to-transparent" />
-
-          <div className="px-6 pt-6 pb-5 flex flex-col items-center gap-4">
-            {/* Live badge */}
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
-              <Radio className="w-3 h-3 animate-pulse" />
-              STREAMER MODE
-            </div>
-
-            {/* Avatar */}
-            <div className="relative">
-              {profile?.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.displayName}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-primary/30 shadow-lg"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-secondary border-4 border-primary/30 flex items-center justify-center shadow-lg">
-                  <span className="text-3xl font-bold text-muted-foreground">
-                    {(username || "?")[0].toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-card" />
-            </div>
-
-            {/* Name */}
-            <div className="text-center">
-              <p className="font-bold text-lg leading-tight">
-                {profile?.displayName ?? username ?? "Player"}
-              </p>
-              {profile?.name && profile.name !== profile.displayName && (
-                <p className="text-xs text-muted-foreground">@{profile.name}</p>
-              )}
-            </div>
-
-            {/* Robux balance display */}
-            <div className="w-full rounded-2xl bg-background border border-border px-5 py-4 flex flex-col items-center gap-1">
-              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
-                Robux Balance
-              </p>
-              <div className="flex items-center gap-2 mt-1">
-                <img src={robuxIcon} alt="Robux" className="w-7 h-7" />
-                <span className="text-3xl font-extrabold tracking-tight">
-                  {isLoggedIn ? fmtBalance : "0"}
-                </span>
-              </div>
-            </div>
-
-            {/* Send Robux button */}
-            <button
-              onClick={() => setSendOpen(true)}
-              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm rounded-2xl py-3 transition-colors shadow-md"
-            >
-              <Send className="w-4 h-4" />
-              Send Robux
-            </button>
-
-            {/* Selected game badge */}
-            {selectedGame && (
-              <div className="w-full flex items-center gap-2.5 rounded-xl bg-background border border-border px-3 py-2">
-                {selectedGame.iconUrl ? (
-                  <img src={selectedGame.iconUrl} alt={selectedGame.name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                    <Gamepad2 className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate">{selectedGame.name}</p>
-                  <p className="text-[10px] text-muted-foreground">Active game</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Footer row */}
-          <div className="px-6 pb-5 flex items-center justify-between">
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="w-4.5 h-4.5" />
-            </button>
-            <button
-              onClick={() => setStreamerMode(false)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-            >
-              <Radio className="w-3 h-3" />
-              Exit streamer mode
-            </button>
-          </div>
-        </div>
-
-        <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-        <SendRobuxModal open={sendOpen} onClose={() => setSendOpen(false)} />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Header */}
@@ -484,6 +376,85 @@ export default function Home() {
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <SendRobuxModal open={sendOpen} onClose={() => setSendOpen(false)} />
+
+      {/* Streamer Mode floating overlay — sits on top of the normal page */}
+      {streamerMode && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none">
+          <div className="pointer-events-auto w-[300px] rounded-2xl border border-white/10 bg-[#0e0f14]/95 backdrop-blur-md shadow-2xl overflow-hidden">
+            {/* Top accent bar */}
+            <div className="h-[3px] w-full bg-gradient-to-r from-primary via-primary/70 to-transparent" />
+
+            <div className="p-4 flex flex-col gap-3">
+              {/* Profile row */}
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  {profile?.avatarUrl ? (
+                    <img
+                      src={profile.avatarUrl}
+                      alt={profile?.displayName}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-secondary border-2 border-primary/30 flex items-center justify-center">
+                      <span className="text-lg font-bold text-muted-foreground">
+                        {(username || "?")[0].toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-[#0e0f14]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm leading-tight truncate">
+                    {profile?.displayName ?? username ?? "Player"}
+                  </p>
+                  {profile?.name && (
+                    <p className="text-[11px] text-muted-foreground truncate">@{profile.name}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-500/10 rounded-full px-2 py-0.5 shrink-0">
+                  <Radio className="w-2.5 h-2.5 animate-pulse" />
+                  LIVE
+                </div>
+              </div>
+
+              {/* Robux + Send — magkadikit (close together) */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 bg-[#1a1c24] border border-white/8 rounded-xl px-3 py-2.5">
+                  <img src={robuxIcon} alt="Robux" className="w-5 h-5 shrink-0" />
+                  <span className="font-extrabold text-lg tracking-tight leading-none">
+                    {isLoggedIn ? fmtBalance : "0"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSendOpen(true)}
+                  className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs px-3 py-2.5 rounded-xl transition-colors shrink-0 shadow"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  Send
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom bar — exit + settings */}
+            <div className="px-4 py-2 border-t border-white/5 flex items-center justify-between">
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                aria-label="Settings"
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setStreamerMode(false)}
+                className="text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <Radio className="w-2.5 h-2.5" />
+                Exit streamer mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
